@@ -1,4 +1,7 @@
 <?php defined("APP") or die() // Main User Page ?>
+<?php
+//dd($urls);
+?>
 <div class="row">	
   <div id="user-content" class="col-md-8">  	
 		<?php echo Main::message() ?>  	

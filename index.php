@@ -21,6 +21,14 @@
 		header("Location: install.php");
 		exit;
 	}
+if(!function_exists('dd')){
+    function dd($var){
+        echo '<pre>';
+        print_r($var);
+        echo '</pre>';
+        exit;
+    }
+}
 	include("includes/config.php");
 	
 	// Run the app

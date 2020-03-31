@@ -82,26 +82,29 @@ class App{
 	public function run(){
 
 		if(isset($_GET["a"]) && !empty($_GET["a"])){
-			
+
 			// Validate Request
 			$var = explode("/",$_GET["a"]);
+
 			if(count($var) > 4) return $this->_404();
 			
 			// Removes dots
-			$var[0] = str_replace(".","", $var[0]);			
+			$var[0] = str_replace(".","", $var[0]);
 			$this->action = Main::clean($var[0],3,TRUE);
 
 			// Run Methods
 			if(isset($var[1]) && !empty($var[1])) $this->do = Main::clean($var[1],3);
-			if(isset($var[2]) && !empty($var[2])) $this->id = Main::clean($var[2],3);			
+			if(isset($var[2]) && !empty($var[2])) $this->id = Main::clean($var[2],3);
+
 			if(in_array($var[0],$this->actions)){
 				$this->checkDNS(TRUE);
 				return $this->{$var[0]}();
 			}
 			// Run Short
 			require(ROOT."/includes/Short.class.php");
-			$short = new Short($this->db,$this->config);			
-			$short->analyze($this->action,$this->do);
+            $short = new Short($this->db,$this->config);
+            $short->analyze($this->action,$this->do);
+
 			return;
 		}else{
 			$this->checkDNS();
@@ -2921,4 +2924,10 @@ class App{
 			return "{$this->http}://www.gravatar.com/avatar/".md5(trim($user->email))."?s={$size}";		
 		}	
   }
+
+  protected function catch_all($action){
+      $another_url = "{$this->http}://myseconddomain.com/".$action;
+      header( "Location: $another_url" );
+  }
+
 }

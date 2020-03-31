@@ -87,10 +87,12 @@ class Short extends App{
 	 * @since 5.2
 	 **/	
 	protected function analyze($action, $do){
+
 		$this->action =$action;
 		$this->do = $do;
 		// Shorten URL
 		if($this->action=="shorten"){
+
 			if(!isset($_POST["url"])) return $this->_404();	
 			if(isset($_POST["urls"]) && isset($_POST["multiple"]) && $_POST["multiple"]=="1"){
 				$array = $this->bulk();
@@ -104,12 +106,14 @@ class Short extends App{
 		}
 		// Stats
 		if(strpos($this->action," ") || strpos($this->action,"+")) {
+
 			$this->action=rtrim(rtrim($this->action," "),"+");
 			return $this->stats();
 		}
 
 		// Run Subactions
 		if(in_array($this->do,array("qr","i","ico")) && method_exists("Short", $this->do)){
+
 			$fn = $this->do;
 			return $this->$fn();
 		}
@@ -487,25 +491,47 @@ class Short extends App{
 		$current = str_replace("/".urlencode($this->action), "", $current);
 		
 		$current = explode("?", $current)[0];
-
+        $data = $this->db->get("url");
+        $alias_array =[];
+        foreach ($data as $dt){
+            array_push($alias_array,$dt->alias);
+        }
 
 		if("http://".$current == $this->config["url"] || "https://".$current == $this->config["url"]){
 			// Fetch URL and show 404 if doesn't exist
+
 			if(!$url=$this->db->get("url","(BINARY alias=:id OR BINARY custom=:id) AND domain LIKE :domain",array("limit"=> 1),array(":id"=>$this->action, ":domain" => "%$current"))){
 
 				if(!$url=$this->db->get("url","(BINARY alias=:id OR BINARY custom=:id) AND domain IS NULL",array("limit"=> 1),array(":id"=>$this->action))){
 
 					$url=$this->db->get("url","(BINARY alias=:id OR BINARY custom=:id) AND domain = ''",array("limit"=> 1),array(":id"=>$this->action));
+
 				}
+
 			}
 		}else{
 			// Fetch URL and show 404 if doesn't exist
 			if(!$url=$this->db->get("url","(BINARY alias=:id OR BINARY custom=:id) AND domain LIKE :domain",array("limit"=> 1),array(":id"=>$this->action, ":domain" => "%$current"))){
 				return $this->_404();
+
 			}			
 		}
+        //dd($url);
+		if(!$url){
+            return $this->catch_all($this->action);
+//            return $this->_404();
+            //dd($alias_array);
+//            dd($this->action);
+////            $current_url = $this->http.'://'.$current.'/'.$this->action;
+//            dd(in_array($this->action,$alias_array));
+//		    if(!in_array($this->action,$alias_array)){
+//                return $this->catch_all($this->action);
+//            }
+//		    else {
+//                return $this->_404();
+//            }
+        }
 
-		if(!$url) return $this->_404();
 
 		$url->url = str_replace("&amp;","&",$url->url);
 
